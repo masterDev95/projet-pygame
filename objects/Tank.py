@@ -4,10 +4,12 @@ from pygame.sprite import *
 import math
 
 class Tank(Sprite):
-    def __init__(self, keys_bind):
+    last_id = 0
+    
+    def __init__(self, keys_bind, x, y):
         super().__init__()
         self.image = image.load('assets/tank.png').convert_alpha()
-        self.rect = self.image.get_rect().move(32, 32)
+        self.rect = self.image.get_rect().move(x, y)
         self.speed = .2
         self.keys = None
         self.delta = .0
@@ -17,9 +19,11 @@ class Tank(Sprite):
         self.invoke_bullet = False
         self.reload_time = 60*2
         self.reload = 0
-        self.x = 32.0
-        self.y = 32.0
+        self.x = float(x)
+        self.y = float(y)
         self.origin = Vector2()
+        self.id = Tank.last_id
+        Tank.last_id += 1
                 
     def update_event(self, keys, delta):
         self.keys = keys
@@ -46,8 +50,6 @@ class Tank(Sprite):
         self.rect.y = self.y
         
         self.origin = Vector2(self.x, self.y)
-        
-        print(self.origin, Vector2(self.x, self.y), Vector2(20, 32).rotate(-self.angle))
 
     def update_angle(self):
         key_left = self.keys[self.keys_bind['move_left']]
@@ -77,4 +79,5 @@ class Tank(Sprite):
         rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
 
         surf.blit(rotated_image, rotated_image_rect)
+        draw.rect(surf, (255, 0, 0), (*rotated_image_rect.topleft, *rotated_image.get_size()),2)
         

@@ -3,8 +3,10 @@ from pygame.sprite import *
 
 import math
 
+from objects.Tank import Tank
+
 class Bullet(Sprite):
-    def __init__(self, angle, x, y):
+    def __init__(self, angle, x, y, appartenance: Tank):
         super().__init__()
         self.image = image.load('assets/bullet.png').convert_alpha()
         self.rect = self.image.get_rect()
@@ -13,6 +15,7 @@ class Bullet(Sprite):
         self.angle = angle
         self.x = float(x)
         self.y = float(y)
+        self.appartenance = appartenance
         
     def update_event(self, delta):
         self.delta = delta
@@ -50,3 +53,4 @@ class Bullet(Sprite):
         rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
 
         surf.blit(rotated_image, rotated_image_rect)
+        draw.rect(surf, (255, 0, 0), (*rotated_image_rect.topleft, *rotated_image.get_size()),2)
