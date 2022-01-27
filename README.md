@@ -1,5 +1,5 @@
 # projet-pygame
- 
+
 ## Liste fonctionnalité
 
 ### Partie config global
