@@ -8,14 +8,13 @@ class Bullet(Sprite):
         super().__init__()
         self.image = image.load('assets/bullet.png').convert_alpha()
         self.rect = self.image.get_rect()
-        self.speed = .1
+        self.speed = .5
         self.delta = .0
         self.angle = angle
         self.x = float(x)
         self.y = float(y)
         
-    def update_event(self, keys, delta):
-        self.keys = keys
+    def update_event(self, delta):
         self.delta = delta
         self.update_motion()
         
@@ -39,10 +38,15 @@ class Bullet(Sprite):
         self.angle = self.angle % 360
         print(self.angle)
         
-    def draw(self, win):
-        self.blit_rotate_center(win, self.image, (self.rect.x, self.rect.y), self.angle)
-    
-    def blit_rotate_center(self, win, image, top_left, angle):
+    def blit_rotate(self, surf, image, pos, originPos, angle):
+        image_rect = image.get_rect(topleft = (pos[0] - originPos[0], pos[1]-originPos[1]))
+        offset_center_to_pivot = Vector2(pos) - image_rect.center
+        
+        rotated_offset = offset_center_to_pivot.rotate(-angle)
+
+        rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
+
         rotated_image = transform.rotate(image, angle)
-        new_rect = rotated_image.get_rect(center=image.get_rect(topleft=top_left).center)
-        win.blit(rotated_image, new_rect.topleft)
+        rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
+
+        surf.blit(rotated_image, rotated_image_rect)

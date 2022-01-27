@@ -1,4 +1,3 @@
-from imp import reload
 from pygame import *
 from pygame.sprite import *
 
@@ -7,8 +6,8 @@ import math
 class Tank(Sprite):
     def __init__(self, keys_bind):
         super().__init__()
-        self.image = image.load('assets/tank.png').convert()
-        self.rect = self.image.get_rect().move(64, 64)
+        self.image = image.load('assets/tank.png').convert_alpha()
+        self.rect = self.image.get_rect().move(32, 32)
         self.speed = .2
         self.keys = None
         self.delta = .0
@@ -18,10 +17,9 @@ class Tank(Sprite):
         self.invoke_bullet = False
         self.reload_time = 60*2
         self.reload = 0
-        self.x = 64.0
-        self.y = 64.0
-        self.originx = self.rect.centerx
-        self.originy = self.rect.bottom
+        self.x = 32.0
+        self.y = 32.0
+        self.origin = Vector2()
                 
     def update_event(self, keys, delta):
         self.keys = keys
@@ -37,15 +35,19 @@ class Tank(Sprite):
         
         velocity = (key_down - key_up) * self.speed
         
-        radians = math.radians(self.angle)
-        vertical = math.cos(radians) * velocity
-        horizontal = math.sin(radians) * velocity
+        self.radians = math.radians(self.angle)
+        vertical = math.cos(self.radians) * velocity
+        horizontal = math.sin(self.radians) * velocity
         
         self.y -= vertical * self.delta
         self.x -= horizontal * self.delta
-        
+            
         self.rect.x = self.x
         self.rect.y = self.y
+        
+        self.origin = Vector2(self.x, self.y)
+        
+        print(self.origin, Vector2(self.x, self.y), Vector2(20, 32).rotate(-self.angle))
 
     def update_angle(self):
         key_left = self.keys[self.keys_bind['move_left']]
@@ -61,13 +63,18 @@ class Tank(Sprite):
             
     def update_reload(self):
         if self.reload > 0:
-            self.reload -= 1           
+            self.reload -= 1
+            
+    def blit_rotate(self, surf, image, pos, originPos, angle):
+        image_rect = image.get_rect(topleft = (pos[0] - originPos[0], pos[1]-originPos[1]))
+        offset_center_to_pivot = Vector2(pos) - image_rect.center
         
-    def draw(self, win):
-        self.blit_rotate_center(win, self.image, (self.rect.x, self.rect.y), self.angle)
-    
-    def blit_rotate_center(self, win, image, top_left, angle):
+        rotated_offset = offset_center_to_pivot.rotate(-angle)
+
+        rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
+
         rotated_image = transform.rotate(image, angle)
-        new_rect = rotated_image.get_rect(center=image.get_rect(topleft=top_left).center)
-        win.blit(rotated_image, new_rect.topleft)
+        rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
+
+        surf.blit(rotated_image, rotated_image_rect)
         

@@ -23,19 +23,28 @@ player1_keys_bind = {
 }
 player1 = Tank(player1_keys_bind)
 
-tous_les_sprites = pygame.sprite.Group()
-tous_les_sprites.add(player1)
+tous_les_tanks = pygame.sprite.Group()
+tous_les_bullets = pygame.sprite.Group()
+tous_les_tanks.add(player1)
 
 def draw(win):
-    for object in tous_les_sprites:
-        object.update_event(keys, delta)
-        object.draw(screen)
+    for bullet in tous_les_bullets:
+        bullet.update_event(delta)
+        x, y = (bullet.rect.x, bullet.rect.y)
+        w, h = bullet.image.get_size()
+        bullet.blit_rotate(screen, bullet.image, (x, y), (w/2, h/2), bullet.angle)
+        
+    for tank in tous_les_tanks:
+        tank.update_event(keys, delta)
+        x, y = (tank.rect.x, tank.rect.y)
+        w, h = tank.image.get_size()
+        tank.blit_rotate(screen, tank.image, (x, y), (w/2, h/2), tank.angle)
     display.update()
 
 #* Game loop
 while True:
     for e in event.get():
-        if e.type == QUIT:
+        if e.type == QUIT:  
             pygame.quit()
             sys.exit()
         
@@ -43,12 +52,12 @@ while True:
     keys = key.get_pressed()
     
     if (player1.invoke_bullet):
-        tous_les_sprites.add(Bullet(player1.angle, player1.rect.centerx, player1.rect.bottom))
+        tous_les_bullets.add(Bullet(player1.angle, player1.origin.x, player1.origin.y))
         player1.invoke_bullet = False
 
     draw(screen)
 
     
     screen.fill((255, 192, 203))
-    tous_les_sprites.update()
+    tous_les_tanks.update()
     
