@@ -1,3 +1,4 @@
+import sys
 import pygame
 from pygame import *
 from pygame.sprite import *
@@ -23,20 +24,24 @@ player1 = Tank(player1_keys_bind)
 tous_les_sprites = pygame.sprite.Group()
 tous_les_sprites.add(player1)
 
+def draw(win, player_car):
+    player_car.draw(win)
+    display.update()
+
 #* Game loop
 while True:
     for e in event.get():
         if e.type == QUIT:
             pygame.quit()
-            break
+            sys.exit()
         
     delta = clock.tick(60)
     keys = key.get_pressed()
-    
-    player1.update_event(keys, delta)
+
+    draw(screen, player1)
+
+    player1.update_event(keys, delta, screen)
     
     screen.fill((255, 192, 203))
-    tous_les_sprites.draw(screen)
     tous_les_sprites.update()
     
-    display.update()
