@@ -1,4 +1,3 @@
-import sys
 import pygame
 from pygame import *
 from pygame.sprite import *
@@ -7,97 +6,46 @@ from objects.Bullet import Bullet
 from objects.Explosion import Explosion
 
 from objects.Tank import Tank
+from menu import *
 
 #* Initialisation jeu
 pygame.init()
 screen = display.set_mode((640, 480), vsync=1)
-display.set_caption("Projet PyGame")
-clock = Clock()
 
-#* Gestion player1
-player1_keys_bind = {
-    'move_left': K_LEFT,
-    'move_right': K_RIGHT,
-    'move_up': K_UP,
-    'move_down': K_DOWN,
-    'fire': K_SPACE
-}
+# Variable
+dark = (0, 0, 0)
 
-player2_keys_bind = {
-    'move_left': K_q,
-    'move_right': K_d,
-    'move_up': K_z,
-    'move_down': K_s,
-    'fire': K_TAB
-}
+# On créer l'écran et on charge les différentes images
+res = (1280, 720)
+display = pygame.display.set_mode(res)
 
-player1 = Tank(player1_keys_bind, 64, 64)
-player2 = Tank(player2_keys_bind,
-               screen.get_width() - 64, screen.get_height() - 64)
+fond = pygame.image.load("assets/fond_jeu.png")
+fond = pygame.transform.scale(fond, res)
+fond.set_alpha(128)
+pygame.Surface.convert_alpha(fond)
 
-tous_les_tanks = pygame.sprite.Group()
-tous_les_bullets = pygame.sprite.Group()
-toutes_les_explosions = pygame.sprite.Group()
-tous_les_tanks.add(player1)
-tous_les_tanks.add(player2)
+# Musique d'intro
+pygame.mixer.init()
+generique = 'assets/sons/musique_accueil.mp3'
+pygame.mixer.music.load(generique)
+pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.play()
 
-def update(win):
-    delta = clock.tick(60)
-    keys = key.get_pressed()
-    
-    for bullet in tous_les_bullets:
-        bullet.update_event(delta)
-        x, y = (bullet.rect.x, bullet.rect.y)
-        w, h = bullet.image.get_size()
-        bullet.blit_rotate(screen, bullet.image, (x, y),
-                           (w/2, h/2), bullet.angle)
-        
-    for tank in tous_les_tanks:
-        tank.update_event(keys, delta)
-        x, y = (tank.rect.x, tank.rect.y)
-        w, h = tank.image.get_size()
-        tank.blit_rotate(screen, tank.image, (x, y),
-                         (w/2, h/2), tank.angle)
-    
-    for explosion in toutes_les_explosions:
-        explosion.update(delta)
-        x, y = (explosion.x, explosion.y)
-        w, h = explosion.image.get_size()
-        explosion.blit_rotate(screen, explosion.image,
-                              (x, y), (w/2, h/2), 0)
-    
-    display.update()
-    
-def invoke_instances():
-    for tank in tous_les_tanks:
-        if tank.invoke_bullet:
-            tous_les_bullets.add(
-                Bullet(tank.angle, tank.origin.x, tank.origin.y, tank))
-            tank.invoke_bullet = False
-            
-        if not tank.alive and not tank.has_explode:
-            toutes_les_explosions.add(Explosion(tank.origin.x, tank.origin.y))
-            tank.has_explode = True
-            
-def collision():
-    for bullet in tous_les_bullets:
-        for tank in tous_les_tanks:
-            if bullet.appartenance.id == tank.id:
-                continue
-            if bullet.rect.colliderect(tank.rect) and tank.alive:
-                tank.alive = False
+# On met un nom à la fenêtre et on positionne l'image de fond
+pygame.display.set_caption("Tank One")
+icone = pygame.image.load('assets/icone.png')
+pygame.display.set_icon(icone)
 
-#* Game loop
-while True:
-    for e in event.get():
-        if e.type == QUIT:  
-            pygame.quit()
-            sys.exit()
-    
-    update(screen)
-    invoke_instances()
-    collision()
-    
-    screen.fill((255, 192, 203))
-    tous_les_tanks.update()
-    
+# Effet fade in ecran titre
+for i in range(0, 255, 5):
+    fond.set_alpha(i)
+    pygame.Surface.convert_alpha(fond)
+    display.fill(dark)
+    display.blit(fond, (0, 0))
+    pygame.display.flip()
+    pygame.time.wait(int(60/2))
+
+#On part dans le Menu
+fonct_menu(display)
+
+
