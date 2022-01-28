@@ -23,6 +23,8 @@ class Tank(Sprite):
         self.y = float(y)
         self.origin = Vector2()
         self.id = Tank.last_id
+        self.alive = True
+        self.has_explode = False
         Tank.last_id += 1
                 
     def update_event(self, keys, delta):
@@ -32,6 +34,8 @@ class Tank(Sprite):
         self.update_angle()
         self.update_keyboard()
         self.update_reload()
+        if not self.alive and not self.has_explode:
+            self.image = image.load('assets/tank_destroyed.png').convert_alpha()
         
     def update_motion(self):
         key_up = self.keys[self.keys_bind['move_up']]

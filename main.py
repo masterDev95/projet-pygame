@@ -4,6 +4,7 @@ from pygame import *
 from pygame.sprite import *
 from pygame.time import *
 from objects.Bullet import Bullet
+from objects.Explosion import Explosion
 
 from objects.Tank import Tank
 
@@ -36,10 +37,11 @@ player2 = Tank(player2_keys_bind,
 
 tous_les_tanks = pygame.sprite.Group()
 tous_les_bullets = pygame.sprite.Group()
+toutes_les_explosions = pygame.sprite.Group()
 tous_les_tanks.add(player1)
 tous_les_tanks.add(player2)
 
-def draw(win):
+def update(win):
     delta = clock.tick(60)
     keys = key.get_pressed()
     
@@ -56,22 +58,34 @@ def draw(win):
         w, h = tank.image.get_size()
         tank.blit_rotate(screen, tank.image, (x, y),
                          (w/2, h/2), tank.angle)
+    
+    for explosion in toutes_les_explosions:
+        explosion.update(delta)
+        x, y = (explosion.x, explosion.y)
+        w, h = explosion.image.get_size()
+        explosion.blit_rotate(screen, explosion.image,
+                              (x, y), (w/2, h/2), 0)
+    
     display.update()
     
-def invoke_bullet():
+def invoke_instances():
     for tank in tous_les_tanks:
-        if (tank.invoke_bullet):
+        if tank.invoke_bullet:
             tous_les_bullets.add(
                 Bullet(tank.angle, tank.origin.x, tank.origin.y, tank))
             tank.invoke_bullet = False
+            
+        if not tank.alive and not tank.has_explode:
+            toutes_les_explosions.add(Explosion(tank.origin.x, tank.origin.y))
+            tank.has_explode = True
             
 def collision():
     for bullet in tous_les_bullets:
         for tank in tous_les_tanks:
             if bullet.appartenance.id == tank.id:
                 continue
-            if bullet.rect.colliderect(tank.rect):
-                tank.kill()
+            if bullet.rect.colliderect(tank.rect) and tank.alive:
+                tank.alive = False
 
 #* Game loop
 while True:
@@ -80,8 +94,8 @@ while True:
             pygame.quit()
             sys.exit()
     
-    draw(screen)
-    invoke_bullet()
+    update(screen)
+    invoke_instances()
     collision()
     
     screen.fill((255, 192, 203))
