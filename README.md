@@ -9,7 +9,7 @@
   - [ ] Volume (sfx, bgm)
   - [ ] Taille fenêtre (Résolution, Fullscreen)
   - [ ] Vsync
-- [ ] HUD
+- [x] HUD
   - [x] Ecran Titre
     - [x] Affichage nom du jeu
   - [ ] Ecran pseudo et couleur Tank

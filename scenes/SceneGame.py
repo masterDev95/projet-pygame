@@ -20,7 +20,15 @@ class SceneGame:
         self.clock = Clock()
         self.win = False
         self.loop = True
+        self.score_value_r = 0
+        self.score_value_b = 0
+        self.font = pygame.font.Font('Headlines-Medium.otf', 32)
+        self.fire_sound = pygame.mixer.Sound('assets/sons/fire.wav')
+        self.explosion_sound = pygame.mixer.Sound('assets/sons/explosion.wav')
+        
         pygame.display.set_caption("Map 1")
+        pygame.mixer.Sound.set_volume(self.fire_sound, 0.1)
+        pygame.mixer.Sound.set_volume(self.explosion_sound, 0.1)
         
         # Appelle des méthodes d'initialisation
         self.map_load()
@@ -44,7 +52,7 @@ class SceneGame:
                 self.walls.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
                 
         # Dessiner le groupe de calque
-        self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=1)
+        self.level_group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=1)
     
     #* Dico touches des joueurs
     def init_touches(self):
@@ -66,11 +74,11 @@ class SceneGame:
 
     def init_objects(self):
         #* Initialisation des joueurs
-        self.player1 = Tank(self.player1_keys_bind, 128, 128, 45)
-        self.player2 = Tank(self.player2_keys_bind,
+        self.player1 = Tank(self.player1_keys_bind, 'red', 128, 128, 90)
+        self.player2 = Tank(self.player2_keys_bind, 'blue',
                             self.screen.get_width() - 128,
                             self.screen.get_height() - 128,
-                            225)
+                            270)
 
         #* Initialisation des groupes
         self.tous_les_tanks = pygame.sprite.Group()
@@ -85,11 +93,11 @@ class SceneGame:
                 if e.type == QUIT:  
                     pygame.quit()
                     sys.exit()
-                elif e.type == pygame.MOUSEBUTTONDOWN and self.win:
+                if e.type == pygame.MOUSEBUTTONDOWN and self.win:
                     if e.button == 1 and self.ls_button_retourRect != None:
                         if self.ls_button_retourRect.collidepoint(e.pos):
                             globals.scene = scenes.SceneEcranTitre.SceneEcranTitre()
-                    
+                            
             self.update()
             self.invoke_instances()
             self.collision()
@@ -102,7 +110,7 @@ class SceneGame:
         # Recup des touches appuyées
         keys = key.get_pressed()
         
-        self.group.draw(self.screen)
+        self.level_group.draw(self.screen)
         
         # Update des bullets
         for bullet in self.tous_les_bullets:
@@ -131,6 +139,9 @@ class SceneGame:
         if self.win:
             self.screen.blit(self.ls_button_retour, self.ls_button_retourRect)
         
+        self.show_score_red()
+        self.show_score_blue()
+        
         # Update de l'affichage
         pygame.display.flip()
         
@@ -138,6 +149,7 @@ class SceneGame:
     def invoke_instances(self):
         for tank in self.tous_les_tanks:
             if tank.invoke_bullet:
+                self.fire_sound.play()
                 self.tous_les_bullets.add(
                     Bullet(tank.angle, tank.origin.x, tank.origin.y, tank))
                 tank.invoke_bullet = False
@@ -153,10 +165,36 @@ class SceneGame:
                 if bullet.appartenance.id == tank.id:
                     continue
                 if bullet.rect.colliderect(tank.rect) and tank.alive:
+                    self.explosion_sound.play()
                     self.invoke_bouton_retour()
                     self.win = True
                     tank.alive = False
-
+                    if tank.team == 'red':
+                        self.score_value_r += 1
+                    else:
+                        self.score_value_b += 1
+            for wall in self.walls:
+                if wall.colliderect(bullet):
+                    bullet.kill()
+                                    
+        for tank in self.tous_les_tanks:
+            tank.collision_box = {
+                'left': False,
+                'right': False,
+                'top': False,
+                'bottom': False
+            }
+            for wall in self.walls:
+                if tank.rect.colliderect(wall):
+                    if abs(wall.left - tank.rect.right) < 10:
+                        tank.collision_box['right'] = True
+                    if abs(wall.right - tank.rect.left) < 10:
+                        tank.collision_box['left'] = True
+                    if abs(wall.top - tank.rect.bottom) < 10:
+                        tank.collision_box['bottom'] = True
+                    if abs(wall.bottom - tank.rect.top) < 10:
+                        tank.collision_box['top'] = True
+                    
     def invoke_bouton_retour(self):
         # Redimmensionner le button
         un_image_width = 735
@@ -173,4 +211,18 @@ class SceneGame:
 
         # positionnement
         self.ls_button_retourRect.topleft = (250, 480)
-            
+
+    def show_score_red(self):
+        score_value_red = self.font.render("Score Rouge : " + str(self.score_value_b), True, (255, 0, 0))
+        bg = Surface(score_value_red.get_size())
+        bg.set_alpha(140)
+        self.screen.blit(bg, (10, 10))
+        self.screen.blit(score_value_red, (10, 10))
+
+    def show_score_blue(self):
+        score_value_blue = self.font.render("Score Bleu : " + str(self.score_value_r), True, (0, 0, 255))
+        bg = Surface(score_value_blue.get_size())
+        bg.set_alpha(140)
+        self.screen.blit(bg, (self.screen.get_width() - score_value_blue.get_width() - 10, 10))
+        self.screen.blit(score_value_blue, (self.screen.get_width() - score_value_blue.get_width() - 10, 10))
+        
