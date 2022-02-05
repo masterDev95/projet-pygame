@@ -14,14 +14,14 @@ import scenes.SceneEcranTitre
 
 
 class SceneGame:
-    def __init__(self):
+    def __init__(self, scr=0, scb=0):
         # Membres
         self.screen = pygame.display.set_mode(globals.res)
         self.clock = Clock()
         self.win = False
         self.loop = True
-        self.score_value_r = 0
-        self.score_value_b = 0
+        self.score_value_r = scr
+        self.score_value_b = scb
         self.font = pygame.font.Font('Headlines-Medium.otf', 32)
         self.fire_sound = pygame.mixer.Sound('assets/sons/fire.wav')
         self.explosion_sound = pygame.mixer.Sound('assets/sons/explosion.wav')
@@ -97,6 +97,10 @@ class SceneGame:
                     if e.button == 1 and self.ls_button_retourRect != None:
                         if self.ls_button_retourRect.collidepoint(e.pos):
                             globals.scene = scenes.SceneEcranTitre.SceneEcranTitre()
+                        if self.ls_button_rejouerRect.collidepoint(e.pos):
+                            for tank in self.tous_les_tanks:
+                                tank.kill()
+                            self.__init__(self.score_value_r, self.score_value_b)
                             
             self.update()
             self.invoke_instances()
@@ -138,6 +142,7 @@ class SceneGame:
         
         if self.win:
             self.screen.blit(self.ls_button_retour, self.ls_button_retourRect)
+            self.screen.blit(self.ls_button_rejouer, self.ls_button_rejouerRect)
         
         self.show_score_red()
         self.show_score_blue()
@@ -166,7 +171,7 @@ class SceneGame:
                     continue
                 if bullet.rect.colliderect(tank.rect) and tank.alive:
                     self.explosion_sound.play()
-                    self.invoke_bouton_retour()
+                    self.invoke_boutons()
                     self.win = True
                     tank.alive = False
                     if tank.team == 'red':
@@ -195,7 +200,7 @@ class SceneGame:
                     if abs(wall.bottom - tank.rect.top) < 10:
                         tank.collision_box['top'] = True
                     
-    def invoke_bouton_retour(self):
+    def invoke_boutons(self):
         # Redimmensionner le button
         un_image_width = 735
         un_image_height = 569
@@ -205,12 +210,18 @@ class SceneGame:
         self.ls_button_retour = pygame.image.load("assets/boutons/retour_btn.png")
         self.ls_button_retour = pygame.transform.scale(
             self.ls_button_retour, (int(un_image_width * scale), int(un_image_height * scale)))
+        
+        self.ls_button_rejouer = pygame.image.load("assets/boutons/btn_rejouer.png")
+        self.ls_button_rejouer = pygame.transform.scale(
+            self.ls_button_rejouer, (int(un_image_width * scale), int(un_image_height * scale)))
 
         # création hitbox
         self.ls_button_retourRect = self.ls_button_retour.get_rect()
+        self.ls_button_rejouerRect = self.ls_button_rejouer.get_rect()
 
         # positionnement
         self.ls_button_retourRect.topleft = (250, 480)
+        self.ls_button_rejouerRect.topleft = (530, 480)
 
     def show_score_red(self):
         score_value_red = self.font.render("Score Rouge : " + str(self.score_value_b), True, (255, 0, 0))
