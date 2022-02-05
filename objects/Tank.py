@@ -39,7 +39,7 @@ class Tank(Sprite):
         }
         
         if self.team == 'red':
-            self.image.fill((255, 0, 0), None, pygame.BLEND_RGB_MULT)
+            self.image.fill((255, 0, 0), None, pygame.BLEND_MULT)
         else:
             self.image.fill((0, 0, 255), None, pygame.BLEND_ADD)
             
@@ -84,7 +84,7 @@ class Tank(Sprite):
             self.angle = 270
         
         # Coord en float
-        self.y -= vertical * self.delta * self.speed * self.alive 
+        self.y -= vertical * self.delta * self.speed * self.alive
         self.x -= horizontal * self.delta * self.speed * self.alive
             
         # Coord du rect

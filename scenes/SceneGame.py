@@ -174,7 +174,7 @@ class SceneGame:
                     else:
                         self.score_value_b += 1
             for wall in self.walls:
-                if wall.colliderect(bullet):
+                if wall.colliderect(bullet) and bullet.can_collide:
                     bullet.kill()
                                     
         for tank in self.tous_les_tanks:
