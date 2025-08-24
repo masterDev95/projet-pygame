@@ -1,31 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@masterDev95 
-github
-/
-gitignore
-Public
-Code
-Pull requests
-211
-Actions
-Security
-Insights
-gitignore/Python.gitignore
-@bdougie
-bdougie Merge pull request #3911 from JP-Ellis/patch-1
-…
-Latest commit 3b6d9b0 on 10 Dec 2021
- History
- 87 contributors
-@arcresu@shiftkey@Lucretiel@Harrison-G@jwg4@GabrielC101@misaelnieto@pmsosa@svkampen@vltr@thedrow@matheussl
-152 lines (124 sloc)  2.7 KB
-   
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
